@@ -1,30 +1,50 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+  <navbar></navbar>
+  <div class="layout">
+    <router-view />
   </div>
-  <router-view />
+  <template v-if="error">
+    <va-alert dense
+              center
+              color="danger">
+      {{ error }}
+    </va-alert>
+  </template>
 </template>
 
+<script>
+import { defineComponent } from 'vue';
+import Navbar from './components/Navbar.vue';
+import { initializeApp } from 'firebase/app';
+import { firebaseConfig } from './configs/firebaseConfig';
+import { mapActions, mapGetters } from 'vuex';
+
+export default defineComponent({
+  components: {
+    Navbar,
+  },
+  computed: {
+    ...mapGetters(['error']),
+  },
+  watch: {
+    error() {
+      if (this.error !== false)
+        setTimeout(() => {
+          this.setError(null);
+        }, 5000);
+    },
+  },
+  created() {
+    initializeApp(firebaseConfig);
+  },
+  methods: {
+    ...mapActions(['setError']),
+  },
+});
+</script>
+
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
+.pointer {
+  cursor: pointer;
 }
 </style>
