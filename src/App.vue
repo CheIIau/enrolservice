@@ -18,6 +18,7 @@ import Navbar from './components/Navbar.vue';
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from './configs/firebaseConfig';
 import { mapActions, mapGetters } from 'vuex';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 export default defineComponent({
   components: {
@@ -36,6 +37,14 @@ export default defineComponent({
   },
   created() {
     initializeApp(firebaseConfig);
+    const auth = getAuth();
+    onAuthStateChanged(auth, (user) => {
+      console.log(user);
+      if (user) {
+        this.$store.dispatch('autoLoginUser', user);
+        this.$router.push('Clients');
+      }
+    });
   },
   methods: {
     ...mapActions(['setError']),

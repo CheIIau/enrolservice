@@ -46,7 +46,12 @@
     <template #footer>
       <va-button :disabled="!isValidForm"
                  type="button"
-                 @click="onEnrol">
+                 @click="onEnrol(), $vaToast.init({
+          message: `Вы записались на ${selectedDate.getDate()} число на ${selectedTime}`,
+          position: 'bottom-right',
+          color: 'success',
+        });">
+        <!-- defect in the ui, components, only solution is above -->
         Записаться
       </va-button>
     </template>
@@ -59,7 +64,8 @@ import { defineComponent } from 'vue';
 import { mapActions } from 'vuex';
 import { timesToPick } from '../../constants/';
 import { getDatabase, ref, update, onValue } from 'firebase/database';
-import { ClientData } from '../../types';
+import { DatePickerType } from '../../types';
+import { ClientData, UpdateClientData } from '../../types/clients';
 
 export default defineComponent({
   name: 'Home',
@@ -128,7 +134,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(['setError']),
-    async onDateClick(e: any): Promise<void> {
+    async onDateClick(e: DatePickerType): Promise<void> {
       const pickedDate = e.date;
       if (pickedDate >= this.minDate && pickedDate <= this.maxDate) {
         const year = pickedDate.getFullYear();
@@ -168,7 +174,7 @@ export default defineComponent({
 
         const enrolDate = new Date();
         const clientData = { name, phone, enrolDate } as ClientData;
-        const updates = {} as any;
+        const updates = {} as UpdateClientData;
         try {
           const db = getDatabase();
           const clientsRef = ref(db, 'clients/');
@@ -181,11 +187,6 @@ export default defineComponent({
         this.selectedDate = this.selectedTime = null;
         this.name = this.phone = '';
         this.showModal = false;
-        this.$vaToast.init({
-          message: `Вы записались на ${day} число на ${time}`,
-          position: 'bottom-right',
-          color: 'success',
-        });
       }
     },
   },

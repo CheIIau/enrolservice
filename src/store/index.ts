@@ -1,20 +1,13 @@
 import { createStore } from 'vuex';
+import user from './user';
+import shared from './shared';
 
 export default createStore({
-  state: { error: null },
-  getters: {
-    error(state) {
-      return state.error;
-    },
-  },
-  mutations: {
-    setError(state, payload) {
-      state.error = payload;
-    },
-  },
-  actions: {
-    setError({ commit }, payload) {
-      commit('setError', payload);
-    },
+  getters: {},
+  mutations: {},
+  actions: {},
+  modules: {
+    user,
+    shared,
   },
 });

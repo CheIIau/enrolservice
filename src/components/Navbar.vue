@@ -10,13 +10,20 @@
                        custom>
             <span role="link"
                   class="pointer"
-                  @click="navigate"
-                  @keypress.enter="navigate">RonikManik</span>
+                  @click="navigate">RonikManik</span>
           </router-link>
         </va-navbar-item>
       </template>
       <template #right>
-        <va-navbar-item>Запись клиента</va-navbar-item>
+        <va-navbar-item>
+          <router-link v-slot="{ navigate }"
+                       to="Login"
+                       custom>
+            <span role="link"
+                  class="pointer"
+                  @click="navigate">Авторизация</span>
+          </router-link>
+        </va-navbar-item>
       </template>
     </va-navbar>
   </div>
