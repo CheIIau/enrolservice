@@ -2,7 +2,7 @@ import { Module } from 'vuex';
 import { UserState } from '../types';
 import { UserClass } from '../types/user';
 import { AuthParamsType } from '../types/user';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 
 const user: Module<UserState, unknown> = {
   state: {
@@ -22,7 +22,8 @@ const user: Module<UserState, unknown> = {
       return state.user;
     },
     localUser(): UserClass | null {
-      return JSON.parse(localStorage.getItem('user') || '{}');
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return JSON.parse(localStorage.getItem('user')!);
     },
     isUserLoggedIn(state): boolean {
       return state.user !== null;
@@ -36,17 +37,24 @@ const user: Module<UserState, unknown> = {
     },
     async loginUser({ commit }, { email, password }: AuthParamsType): Promise<void> {
       const auth = getAuth();
-      console.log(email, password);
       signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           const user = userCredential.user;
-          console.log(user);
           commit('setUser', { user: user.uid });
         })
         .catch((error: any) => {
           commit('setError', error.message);
           throw error;
         });
+    },
+    async logoutUser({ commit }) {
+      const auth = getAuth();
+      await signOut(auth).catch((error) => {
+        commit('setError', error.message);
+        throw error;
+      });
+      localStorage.removeItem('user');
+      commit('setUser', null);
     },
   },
 };

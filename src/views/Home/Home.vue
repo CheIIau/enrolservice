@@ -51,7 +51,7 @@
           position: 'bottom-right',
           color: 'success',
         });">
-        <!-- defect in the ui, components, only solution is above -->
+        <!-- defect in the ui, only solution is above -->
         Записаться
       </va-button>
     </template>
@@ -164,13 +164,13 @@ export default defineComponent({
       this.showModal = true;
     },
     async onEnrol(): Promise<void> {
-      if (this.selectedDate && this.selectedTime) {
+      const name = this.name;
+      const phone = this.phone;
+      if (this.selectedDate && this.selectedTime && name && phone) {
         const year = this.selectedDate.getFullYear();
         const month = this.selectedDate.getMonth();
         const day = this.selectedDate.getDate();
         const time = this.selectedTime;
-        const name = this.name;
-        const phone = this.phone;
 
         const enrolDate = new Date();
         const clientData = { name, phone, enrolDate } as ClientData;
@@ -187,6 +187,8 @@ export default defineComponent({
         this.selectedDate = this.selectedTime = null;
         this.name = this.phone = '';
         this.showModal = false;
+      } else {
+        this.setError('Введите все данные для записи');
       }
     },
   },

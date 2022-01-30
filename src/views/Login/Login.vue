@@ -24,6 +24,7 @@
 </template>
 
 <script lang="ts">
+import { AuthParamsType } from '@/types/user';
 import { defineComponent } from 'vue';
 import { mapActions } from 'vuex';
 
@@ -59,7 +60,7 @@ export default defineComponent({
     async login() {
       if (this.isValid) {
         try {
-          this.loginUser({ email: this.email, password: this.password });
+          this.loginUser({ email: this.email, password: this.password } as AuthParamsType);
         } catch (error: any) {
           this.setError(error.message);
         }
