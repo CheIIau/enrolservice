@@ -1,12 +1,10 @@
-import { UserClass } from '../types/user';
-
-export interface UserState {
-  user: UserClass | null;
-}
-
 // export interface RootState {
 
 // }
+
+export interface Error {
+  message: string;
+}
 
 export interface SharedState {
   error: string | null;

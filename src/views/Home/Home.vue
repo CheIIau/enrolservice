@@ -7,7 +7,7 @@
   </div>
   <div v-if="!selectedDate"
        class="wrapper">
-    <span color="success">Выберите дату</span>
+    <span class="datepick-message">Выберите дату</span>
   </div>
   <div v-if="selectedDate"
        class="wrapper">
@@ -66,6 +66,7 @@ import { timesToPick } from '../../constants/';
 import { getDatabase, ref, update, onValue } from 'firebase/database';
 import { DatePickerType } from '../../types';
 import { ClientData, UpdateClientData } from '../../types/clients';
+import { maxDate, minDate } from './Home';
 
 export default defineComponent({
   name: 'Home',
@@ -77,7 +78,7 @@ export default defineComponent({
       selectedDate: null as null | Date,
       selectedTime: null as null | string,
       showModal: false as boolean,
-      timeIsInUse: [] as Array<string>,
+      timeIsInUse: timesToPick as Array<string>,
       name: '' as string,
       phone: '' as string,
       nameRules: [
@@ -94,16 +95,10 @@ export default defineComponent({
   },
   computed: {
     maxDate(): Date {
-      const maxDate = new Date();
-      maxDate.setMonth(maxDate.getMonth() + 1);
-      maxDate.setHours(0, 0, 0, 0);
-      return maxDate;
+      return maxDate();
     },
     minDate(): Date {
-      const minDate = new Date();
-      minDate.setDate(minDate.getDate() + 1);
-      minDate.setHours(0, 0, 0, 0);
-      return minDate;
+      return minDate();
     },
     timesToPick(): Array<string> {
       return timesToPick;
@@ -196,11 +191,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.wrapper {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 10px;
-}
 .radioButtonWrapper {
   max-width: 300px;
   display: flex;
@@ -216,4 +206,10 @@ export default defineComponent({
 .isUnactive {
   border-color: rgb(255, 65, 110, 0.5);
 }
+
+.datepick-message {
+  font-family: 'Source Sans Pro', sans-serif;
+  color: rgb(24, 71, 121);
+}
 </style>
+

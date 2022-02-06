@@ -11,6 +11,10 @@ export interface UserClass {
   appName: string;
 }
 
+export interface UserState {
+  user: UserClass | null;
+}
+
 declare interface ProviderDatum {
   providerId: string;
   uid: string;

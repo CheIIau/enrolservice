@@ -18,8 +18,14 @@ export interface ClientData {
   name: string;
   phone: string;
   enrolDate: Date;
+  day?: string;
 }
 
 export interface UpdateClientData {
   [key: string]: ClientData;
+}
+
+export interface TypeClientsDaysFromDB {
+  availableDays: Array<number>;
+  clientsAtDay: ClientsAtDayType;
 }

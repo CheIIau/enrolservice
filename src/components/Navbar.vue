@@ -24,9 +24,18 @@
                   class="pointer"
                   @click="navigate">Авторизация</span>
           </router-link>
-          <va-button v-else
-                     type="button"
-                     @click="onLogout"> Выйти </va-button>
+          <div v-else>
+            <router-link v-slot="{ navigate }"
+                         to="Clients"
+                         custom>
+              <span role="link"
+                    class="pointer  navbar-item"
+                    @click="navigate">Клиенты</span>
+            </router-link>
+            <va-button type="button"
+                       @click="onLogout"> Выйти </va-button>
+          </div>
+
         </va-navbar-item>
       </template>
     </va-navbar>
@@ -50,3 +59,30 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.navbar-item {
+  border: rgb(109, 190, 255) solid 2px;
+  border-radius: 15px;
+  padding: 5px;
+}
+@media (max-width: 767.98px) {
+  .va-navbar {
+    padding: 0;
+    height: 3.5rem;
+  }
+}
+</style>
+
+<style>
+@media (max-width: 767.98px) {
+  .va-navbar__content {
+    flex-direction: row !important;
+  }
+}
+@media (max-width: 400px) {
+  .va-navbar__left {
+    justify-content: left !important;
+  }
+}
+</style>

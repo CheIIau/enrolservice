@@ -7,7 +7,7 @@
            :key="year">
         <va-button type="button"
                    class="mt-2"
-                   @click="getClientsEnrolMonths(year)"> {{ year }} </va-button>
+                   @click="getClentsEnrolMonths(year)"> {{ year }} </va-button>
       </div>
     </va-button-dropdown>
     <div>
@@ -19,7 +19,7 @@
              :key="month">
           <va-button type="button"
                      class="mt-2"
-                     @click="getClientsDays(month)"> {{ month }} </va-button>
+                     @click="getClentsData(month)"> {{ month }} </va-button>
         </div>
       </va-button-dropdown>
     </div>
@@ -36,7 +36,7 @@
                  @dayclick="getClientsOnDay($event)" />
   </div>
 
-  <!-- <va-data-table v-if="showDataTable"
+  <va-data-table v-if="showDataTable"
                  :items="items"
                  :columns="columns"
                  striped>
@@ -65,7 +65,7 @@
                  icon="delete"
                  @click="deleteItemById(rowIndex)" />
     </template>
-  </va-data-table> -->
+  </va-data-table>
 </template>
 
 <script lang="ts">
@@ -75,7 +75,7 @@ import { defineComponent } from 'vue';
 import { getDatabase, ref, child, onValue } from 'firebase/database';
 import { ClientsAtTimeType, ClientsAtDayType } from '../../types/clients';
 import { monthsOfTheYear } from '../../constants';
-import { getYearsFromDB, maxDate, minDate, getMonthNumber, getClientsDaysFromDB } from './Clients';
+import { daysInMonth } from '../../functions';
 
 export default defineComponent({
   components: {
@@ -110,20 +110,42 @@ export default defineComponent({
       }
       return result;
     },
-    minDate(): Date {
-      const year = this.selectedYear!;
-      const month = this.selectedMonth!;
-      return minDate(year, month);
+    minDate(): Date { //separate js
+      const year = this.selectedYear;
+      const month = this.selectedMonth;
+      const minDate = new Date();
+      if (year && month !== null) {
+        minDate.setFullYear(year, month);
+        minDate.setHours(0, 0, 0, 0);
+      }
+      return minDate;
     },
-    maxDate(): Date {
-      const year = this.selectedYear!;
-      const month = this.selectedMonth!;
-      return maxDate(year, month);
+    maxDate(): Date { //separate js
+      const year = this.selectedYear;
+      const month = this.selectedMonth;
+      const maxDate = new Date();
+      maxDate.setHours(0, 0, 0, 0);
+      if (year && month !== null) {
+        const days = daysInMonth(year, month);
+        maxDate.setFullYear(year, month, days);
+      }
+      return maxDate;
     },
   },
-  async created() {
-    try {
-      this.years = await getYearsFromDB();
+  async created() { 
+    try {//separate js
+      const db = getDatabase();
+      const clientsRef = ref(db);
+      const clientsRefChildren = child(clientsRef, 'clients');
+      await new Promise<void>((resolve) => {
+        onValue(clientsRefChildren, (snapshot) => {
+          snapshot.forEach((child) => {
+            const enrolYears = child.key as string;
+            this.years.push(enrolYears);
+          });
+          resolve();
+        });
+      });
     } catch (error: any) {
       this.setError(error.message);
     }
@@ -131,25 +153,39 @@ export default defineComponent({
 
   methods: {
     ...mapActions(['setError']),
-    async getClientsDays(month: string) {
-      const year = String(this.selectedYear);
+    async getClentsData(month: string) {
+      const monthNumber = monthsOfTheYear.findIndex((el) => el === month);
+      this.selectedMonth = Number(monthNumber);
+      const year = this.selectedYear;
       this.availableDays = [];
-      const monthNumber = getMonthNumber(month);
-      this.selectedMonth = monthNumber;
       try {
-        const { availableDays, clientsAtDay } = await getClientsDaysFromDB(year, monthNumber);
-        this.availableDays = availableDays;
-        console.log(clientsAtDay);
+        const db = getDatabase();
+        const clientsRef = ref(db, 'clients');
+        const resultTimes = {} as ClientsAtDayType;
+        const clientsRefChildren = child(clientsRef, `${year}/${monthNumber}`);
+        await new Promise<void>((resolve) => {
+          onValue(clientsRefChildren, (snapshot) => {
+            snapshot.forEach((child) => {
+              const day = child.key as string;
+              this.availableDays.push(Number(day));
+              const enrolTime = child.val() as ClientsAtTimeType;
+              Object.assign(resultTimes, { [day]: enrolTime });
+            });
+            console.log(resultTimes);
+            resolve();
+          });
+        });
         this.showCalendar = true;
         this.$nextTick(async () => {
           const calendar = this.$refs.calendar as any;
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           await calendar.move(`${year}-0${this.selectedMonth! + 1}-01`, { force: true });
         });
       } catch (error: any) {
         this.setError(error.message);
       }
     },
-    async getClientsEnrolMonths(year: string) {
+    async getClentsEnrolMonths(year: string) {
       this.selectedYear = Number(year);
       this.showCalendar = false;
       this.months = [];

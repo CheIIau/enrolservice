@@ -1,8 +1,7 @@
 import { Module } from 'vuex';
-import { UserState } from '../types';
-import { UserClass } from '../types/user';
+import { UserState, UserClass } from '../types/user';
 import { AuthParamsType } from '../types/user';
-import { getAuth, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, signOut, User } from 'firebase/auth';
 
 const user: Module<UserState, unknown> = {
   state: {
@@ -30,7 +29,7 @@ const user: Module<UserState, unknown> = {
     },
   },
   actions: {
-    autoLoginUser({ commit }, payload): void {
+    autoLoginUser({ commit }, payload: User): void {
       const user = { uid: payload.uid };
       commit('setUser', user);
       commit('setLocalUser', user);
