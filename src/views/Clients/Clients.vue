@@ -28,7 +28,7 @@
   <div class="wrapper">
     <date-picker v-if="showCalendar"
                  ref="calendar"
-                 v-model="selectedDay"
+                 v-model="datePickerDate"
                  :min-date='minDate'
                  :max-date='maxDate'
                  :disabled-dates="{weekdays: [1,2,3,4,5,6,7]}"
@@ -36,27 +36,10 @@
                  @dayclick="getClientsOnDay($event)" />
   </div>
 
-  <!-- <va-data-table v-if="showDataTable"
-                 :items="items"
-                 :columns="columns"
+  <va-data-table v-if="showDataTable"
+                 :items="arrayOfClients"
+                 :columns="columnNames"
                  striped>
-    <template #headerAppend>
-      <tr class="table-example--slot">
-        <th v-for="key in Object.keys(createdItem)"
-            :key="key"
-            colspan="1">
-          <va-input v-model="createdItem[key]"
-                    :placeholder="key" />
-        </th>
-        <th colspan="1">
-          <va-button :disabled="!isNewData"
-                     @click="addNewItem()">
-            Add
-          </va-button>
-        </th>
-      </tr>
-    </template>
-
     <template #cell(actions)="{ rowIndex }">
       <va-button flat
                  icon="edit"
@@ -65,7 +48,7 @@
                  icon="delete"
                  @click="deleteItemById(rowIndex)" />
     </template>
-  </va-data-table> -->
+  </va-data-table>
 </template>
 
 <script lang="ts">
@@ -75,7 +58,7 @@ import { defineComponent } from 'vue';
 import { getDatabase, ref, child, onValue } from 'firebase/database';
 import { ClientsAtTimeType, ClientsAtDayType } from '../../types/clients';
 import { monthsOfTheYear } from '../../constants';
-import { getYearsFromDB, maxDate, minDate, getMonthNumber, getClientsDaysFromDB } from './Clients';
+import { getYearsFromDB, maxDate, minDate, getMonthNumber, getClientsDaysFromDB, deleteClientFromDB } from './Clients';
 
 export default defineComponent({
   components: {
@@ -87,11 +70,18 @@ export default defineComponent({
       showDataTable: false as boolean,
       selectedYear: null as number | null,
       selectedMonth: null as number | null,
+      selectedDay: null as number | null,
       years: [] as Array<string>,
       months: [] as Array<string>,
-      clentsEnrolData: {} as ClientsAtDayType,
-      selectedDay: null as null | Date,
+      clientsEnrolData: {} as ClientsAtDayType,
+      datePickerDate: null as null | Date,
       availableDays: [] as Array<number>,
+      columnNames: [
+        { key: 'name', label: 'Имя', sortable: true },
+        { key: 'time', label: 'Время записи', sortable: true },
+        { key: 'phone', label: 'Телефон', sortable: true },
+        { key: 'actions', width: '80px', label: 'Действия' },
+      ],
     };
   },
   computed: {
@@ -103,8 +93,8 @@ export default defineComponent({
     },
     arrayOfClients() {
       const result = [];
-      for (const key in this.clentsEnrolData) {
-        const oneClientEnrolData = this.clentsEnrolData[key] as any;
+      for (const key in this.clientsEnrolData) {
+        const oneClientEnrolData = this.clientsEnrolData[key] as any; //gotta be fixed
         oneClientEnrolData.time = key;
         result.push(oneClientEnrolData);
       }
@@ -134,6 +124,7 @@ export default defineComponent({
     async getClientsDays(month: string) {
       const year = String(this.selectedYear);
       this.availableDays = [];
+      this.showDataTable = false;
       const monthNumber = getMonthNumber(month);
       this.selectedMonth = monthNumber;
       try {
@@ -152,6 +143,7 @@ export default defineComponent({
     async getClientsEnrolMonths(year: string) {
       this.selectedYear = Number(year);
       this.showCalendar = false;
+      this.showDataTable = false;
       this.months = [];
       try {
         const db = getDatabase();
@@ -171,9 +163,10 @@ export default defineComponent({
       }
     },
     async getClientsOnDay(e: any): Promise<void> {
+      this.showDataTable = false;
+      const day = (this.selectedDay = e.day);
       const year = this.selectedYear;
       const month = this.selectedMonth;
-      const day = e.day;
       const resultTimes = {} as ClientsAtDayType;
       try {
         const db = getDatabase();
@@ -187,13 +180,25 @@ export default defineComponent({
               Object.assign(resultTimes, { [time]: enrolCleintData });
             });
             console.log(resultTimes);
-            this.clentsEnrolData = resultTimes;
+            this.clientsEnrolData = resultTimes;
+            this.showDataTable = true;
             resolve();
           });
         });
       } catch (error: any) {
         this.setError(error.message);
       }
+    },
+    openModalToEditItemById(e: any) {
+      console.log(e);
+    },
+    async deleteItemById(rowIndex: any) {
+      const year = this.selectedYear!;
+      const month = this.selectedMonth!;
+      const day = this.selectedDay!;
+      const time = this.arrayOfClients[rowIndex].time;
+      await deleteClientFromDB(year, month, day, time);
+      delete this.clientsEnrolData[time];
     },
   },
 });

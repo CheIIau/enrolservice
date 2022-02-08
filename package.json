@@ -60,6 +60,7 @@
       "vue/html-closing-bracket-newline": "off",
       "vue/html-self-closing": "off",
       "@typescript-eslint/no-var-requires": 0,
+      "@typescript-eslint/no-non-null-assertion": "off",
       "prettier/prettier": [
         "off",
         {

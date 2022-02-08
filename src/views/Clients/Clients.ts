@@ -1,7 +1,10 @@
-import { getDatabase, ref, child, onValue } from 'firebase/database';
+import { getDatabase, ref, child, onValue, set } from 'firebase/database';
 import { daysInMonth } from '../../functions';
 import { monthsOfTheYear } from '../../constants';
 import { ClientsAtTimeType, ClientsAtDayType, TypeClientsDaysFromDB } from '../../types/clients';
+
+//import store from '../store';
+//store.getters.token());
 
 export async function getYearsFromDB(): Promise<Array<string>> {
   const db = getDatabase();
@@ -61,4 +64,10 @@ export async function getClientsDaysFromDB(year: string, month: number): Promise
 
 export function getMonthNumber(month: string): number {
   return monthsOfTheYear.findIndex((el) => el === month);
+}
+
+export async function deleteClientFromDB(year: number, month: number, day: number, time: string): Promise<void> {
+  const db = getDatabase();
+  const clientsRef = ref(db, `clients/${year}/${month}/${day}/${time}`);
+  await set(clientsRef, null);
 }
