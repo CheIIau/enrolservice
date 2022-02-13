@@ -20,7 +20,7 @@ export const timesToPick = [
   '18:00',
   '18:30',
   '19:00',
-];
+] as Array<string>;
 
 export const monthsOfTheYear = [
   'Январь',
@@ -35,4 +35,4 @@ export const monthsOfTheYear = [
   'Октябрь',
   'Ноябрь',
   'Декабрь',
-];
+] as Array<string>;

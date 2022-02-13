@@ -49,16 +49,38 @@
                  @click="deleteItemById(rowIndex)" />
     </template>
   </va-data-table>
+
+  <va-modal :model-value="!!editedItem"
+            message="Изменить запись"
+            @ok="editItem"
+            @cancel="resetEditedItem">
+    <slot>
+      <va-input v-for="key in Object.keys(editedItem)"
+                :key="key"
+                v-model="editedItem[key]"
+                class="my-3"
+                :label="key" />
+    </slot>
+  </va-modal>
 </template>
 
 <script lang="ts">
-import { DatePicker } from 'v-calendar';
-import { mapActions } from 'vuex';
 import { defineComponent } from 'vue';
-import { getDatabase, ref, child, onValue } from 'firebase/database';
-import { ClientsAtTimeType, ClientsAtDayType } from '../../types/clients';
+import { DatePicker } from 'v-calendar';
+import { ClientsAtTimeType, ClientData } from '../../types/clients';
+import { DatePickerType } from '../../types/';
 import { monthsOfTheYear } from '../../constants';
-import { getYearsFromDB, maxDate, minDate, getMonthNumber, getClientsDaysFromDB, deleteClientFromDB } from './Clients';
+import {
+  getYearsFromDB,
+  maxDate,
+  minDate,
+  getMonthNumber,
+  getClientsDaysFromDB,
+  deleteClientFromDB,
+  getClientsEnrolMonthsFromDB,
+  getClientsOnDayFromDB,
+  editClientDataInDB,
+} from './Clients';
 
 export default defineComponent({
   components: {
@@ -73,7 +95,7 @@ export default defineComponent({
       selectedDay: null as number | null,
       years: [] as Array<string>,
       months: [] as Array<string>,
-      clientsEnrolData: {} as ClientsAtDayType,
+      clientsEnrolData: {} as ClientsAtTimeType,
       datePickerDate: null as null | Date,
       availableDays: [] as Array<number>,
       columnNames: [
@@ -82,6 +104,8 @@ export default defineComponent({
         { key: 'phone', label: 'Телефон', sortable: true },
         { key: 'actions', width: '80px', label: 'Действия' },
       ],
+      editedItemId: null as null | number,
+      editedItem: null as ClientData | null,
     };
   },
   computed: {
@@ -94,10 +118,14 @@ export default defineComponent({
     arrayOfClients() {
       const result = [];
       for (const key in this.clientsEnrolData) {
-        const oneClientEnrolData = this.clientsEnrolData[key] as any; //gotta be fixed
+        const oneClientEnrolData = this.clientsEnrolData[key] as unknown as ClientData;
         oneClientEnrolData.time = key;
+        delete oneClientEnrolData.enrolDate;
         result.push(oneClientEnrolData);
       }
+      result.sort((a: ClientData, b: ClientData): number => {
+        return Number(a.time!.split(':')[0]) - Number(b.time!.split(':')[0]);
+      });
       return result;
     },
     minDate(): Date {
@@ -112,93 +140,75 @@ export default defineComponent({
     },
   },
   async created() {
-    try {
-      this.years = await getYearsFromDB();
-    } catch (error: any) {
-      this.setError(error.message);
-    }
+    this.years = await getYearsFromDB();
   },
 
   methods: {
-    ...mapActions(['setError']),
-    async getClientsDays(month: string) {
-      const year = String(this.selectedYear);
+    async getClientsDays(month: string): Promise<void> {
       this.availableDays = [];
       this.showDataTable = false;
+      const year = String(this.selectedYear);
       const monthNumber = getMonthNumber(month);
       this.selectedMonth = monthNumber;
-      try {
-        const { availableDays, clientsAtDay } = await getClientsDaysFromDB(year, monthNumber);
-        this.availableDays = availableDays;
-        console.log(clientsAtDay);
-        this.showCalendar = true;
-        this.$nextTick(async () => {
-          const calendar = this.$refs.calendar as any;
-          await calendar.move(`${year}-0${this.selectedMonth! + 1}-01`, { force: true });
-        });
-      } catch (error: any) {
-        this.setError(error.message);
-      }
+      const availableDays = await getClientsDaysFromDB(year, monthNumber);
+      this.availableDays = availableDays;
+      this.showCalendar = true;
+      this.$nextTick(async () => {
+        const calendar = this.$refs.calendar as any;
+        await calendar.move(`${year}-0${this.selectedMonth! + 1}-01`, { force: true });
+      });
     },
-    async getClientsEnrolMonths(year: string) {
+
+    async getClientsEnrolMonths(year: string): Promise<void> {
       this.selectedYear = Number(year);
       this.showCalendar = false;
       this.showDataTable = false;
-      this.months = [];
-      try {
-        const db = getDatabase();
-        const clientsRef = ref(db);
-        const clientsRefChildren = child(clientsRef, `clients/${year}`);
-        await new Promise<void>((resolve) => {
-          onValue(clientsRefChildren, (snapshot) => {
-            snapshot.forEach((child) => {
-              const month = child.key as string;
-              this.months.push(month);
-            });
-            resolve();
-          });
-        });
-      } catch (error: any) {
-        this.setError(error.message);
-      }
+      this.months = await getClientsEnrolMonthsFromDB(year);
     },
-    async getClientsOnDay(e: any): Promise<void> {
+
+    async getClientsOnDay(e: DatePickerType): Promise<void> {
       this.showDataTable = false;
       const day = (this.selectedDay = e.day);
-      const year = this.selectedYear;
-      const month = this.selectedMonth;
-      const resultTimes = {} as ClientsAtDayType;
-      try {
-        const db = getDatabase();
-        const clientsRef = ref(db, 'clients');
-        const clientsRefChildren = child(clientsRef, `${year}/${month}/${day}`);
-        await new Promise<void>((resolve) => {
-          onValue(clientsRefChildren, (snapshot) => {
-            snapshot.forEach((child) => {
-              const time = child.key as string;
-              const enrolCleintData = child.val() as ClientsAtTimeType;
-              Object.assign(resultTimes, { [time]: enrolCleintData });
-            });
-            console.log(resultTimes);
-            this.clientsEnrolData = resultTimes;
-            this.showDataTable = true;
-            resolve();
-          });
-        });
-      } catch (error: any) {
-        this.setError(error.message);
-      }
+      const year = this.selectedYear!;
+      const month = this.selectedMonth!;
+      this.clientsEnrolData = await getClientsOnDayFromDB(year, month, day);
+      this.showDataTable = true;
     },
-    openModalToEditItemById(e: any) {
-      console.log(e);
+
+    openModalToEditItemById(id: number) {
+      this.editedItemId = id;
+      this.editedItem = { ...this.arrayOfClients[id] };
     },
-    async deleteItemById(rowIndex: any) {
+
+    async deleteItemById(rowIndex: number) {
       const year = this.selectedYear!;
       const month = this.selectedMonth!;
       const day = this.selectedDay!;
-      const time = this.arrayOfClients[rowIndex].time;
+      const time = this.arrayOfClients[rowIndex].time!;
       await deleteClientFromDB(year, month, day, time);
       delete this.clientsEnrolData[time];
+    },
+
+    resetEditedItem() {
+      this.editedItem = null;
+      this.editedItemId = null;
+    },
+
+    async editItem() {
+      if (this.editedItemId !== null) {
+        const year = this.selectedYear!;
+        const month = this.selectedMonth!;
+        const day = this.selectedDay!;
+        const time = this.arrayOfClients[this.editedItemId].time!;
+        const newClientData = this.editedItem as ClientData;
+        if (newClientData) {
+          await editClientDataInDB(year, month, day, time, newClientData);
+          delete this.clientsEnrolData[time];
+          this.clientsEnrolData[newClientData.time!] = newClientData;
+        }
+        this.editedItem = null;
+        this.editedItemId = null;
+      }
     },
   },
 });

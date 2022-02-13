@@ -60,7 +60,8 @@ export default defineComponent({
     async login() {
       if (this.isValid) {
         try {
-          this.loginUser({ email: this.email, password: this.password } as AuthParamsType);
+          await this.loginUser({ email: this.email, password: this.password } as AuthParamsType);
+          this.$router.push('/');
         } catch (error: any) {
           this.setError(error.message);
         }

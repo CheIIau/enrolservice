@@ -51,7 +51,7 @@
           position: 'bottom-right',
           color: 'success',
         });">
-        <!-- defect in the ui, only solution is above -->
+        <!-- defect in the ui, the only solution is above -->
         Записаться
       </va-button>
     </template>
@@ -61,12 +61,11 @@
 <script lang="ts">
 import { DatePicker } from 'v-calendar';
 import { defineComponent } from 'vue';
-import { mapActions } from 'vuex';
 import { timesToPick } from '../../constants/';
-import { getDatabase, ref, update, onValue } from 'firebase/database';
 import { DatePickerType } from '../../types';
-import { ClientData, UpdateClientData } from '../../types/clients';
-import { maxDate, minDate } from './Home';
+import { ClientData } from '../../types/clients';
+import { maxDate, minDate, getOccupiedTimes, enrolAClient } from './Home';
+import { mapActions } from 'vuex';
 
 export default defineComponent({
   name: 'Home',
@@ -129,35 +128,21 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(['setError']),
-    async onDateClick(e: DatePickerType): Promise<void> {
+    async onDateClick(e: DatePickerType) {
+      this.selectedTime = null;
       const pickedDate = e.date;
       if (pickedDate >= this.minDate && pickedDate <= this.maxDate) {
         const year = pickedDate.getFullYear();
         const month = pickedDate.getMonth();
         const day = pickedDate.getDate();
-        const resultTimes = [] as Array<string>;
-        try {
-          const db = getDatabase();
-          const clientsRef = ref(db, `clients/${year}/${month}/${day}`);
-          await new Promise<void>((resolve) => {
-            onValue(clientsRef, (snapshot) => {
-              snapshot.forEach((child) => {
-                const enrolTime = child.key as string;
-                resultTimes.push(enrolTime);
-              });
-              resolve();
-            });
-          });
-          this.selectedTime = null;
-          this.timeIsInUse = resultTimes;
-        } catch (error: any) {
-          this.setError(error.message);
-        }
+        this.timeIsInUse = await getOccupiedTimes(year, month, day);
       }
     },
+
     onModalOpen(): void {
       this.showModal = true;
     },
+
     async onEnrol(): Promise<void> {
       const name = this.name;
       const phone = this.phone;
@@ -166,19 +151,9 @@ export default defineComponent({
         const month = this.selectedDate.getMonth();
         const day = this.selectedDate.getDate();
         const time = this.selectedTime;
-
         const enrolDate = new Date();
         const clientData = { name, phone, enrolDate } as ClientData;
-        const updates = {} as UpdateClientData;
-        try {
-          const db = getDatabase();
-          const clientsRef = ref(db, 'clients/');
-          const updateKey = `${year}/${month}/${day}/${time}` as string;
-          updates[updateKey] = clientData;
-          await update(clientsRef, updates);
-        } catch (error: any) {
-          this.setError(error.message);
-        }
+        await enrolAClient(year, month, day, time, clientData);
         this.selectedDate = this.selectedTime = null;
         this.name = this.phone = '';
         this.showModal = false;

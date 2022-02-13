@@ -17,15 +17,16 @@ export interface ClientsAtYearsType {
 export interface ClientData {
   name: string;
   phone: string;
-  enrolDate: Date;
+  enrolDate?: Date;
   day?: string;
+  time?: string,
 }
 
 export interface UpdateClientData {
   [key: string]: ClientData;
 }
 
-export interface TypeClientsDaysFromDB {
-  availableDays: Array<number>;
-  clientsAtDay: ClientsAtDayType;
-}
+// export interface TypeClientsDaysFromDB {
+//   availableDays: Array<number>;
+//   clientsAtDay: ClientsAtDayType;
+// }
