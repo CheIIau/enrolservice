@@ -13,14 +13,14 @@
 </template>
 
 <script lang="ts">
-
 import { getMessaging, getToken } from 'firebase/messaging';
 import { defineComponent } from 'vue';
 import Navbar from './components/Navbar.vue';
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from './configs/firebaseConfig';
 import { mapActions, mapGetters } from 'vuex';
-import { getAuth, onAuthStateChanged} from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { init } from '@emailjs/browser';
 
 export default defineComponent({
   components: {
@@ -46,6 +46,8 @@ export default defineComponent({
       }
     });
     const messaging = getMessaging();
+
+    init('user_HsEzFyOL27ObVuaNpwDbA');
 
     getToken(messaging, {
       vapidKey: 'BEzJ0Spne0WLLV-Wx5bMCr5F2-1Q2BRI2VbKep8Dmph84BQfQgr_kG_LSAnBqNc4_F4T2IUHoycS3hhFoeZtB8U',

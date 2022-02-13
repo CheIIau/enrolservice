@@ -34,24 +34,24 @@
       <h2>Введите контактные данные</h2>
     </template>
     <slot>
-      <va-input v-model="name"
-                :rules="nameRules"
-                class="mt-4"
-                placeholder="Введите имя" />
-      <va-input v-model="phone"
-                :rules="phoneRules"
-                class="mt-4"
-                placeholder="Введите номер телефона" />
+      <va-inner-loading :loading="loading"
+                        color="primary">
+        <va-input v-model="name"
+                  :rules="nameRules"
+                  class="mt-4"
+                  placeholder="Введите имя" />
+        <va-input v-model="phone"
+                  :rules="phoneRules"
+                  class="mt-4"
+                  placeholder="Введите номер телефона" />
+
+      </va-inner-loading>
     </slot>
     <template #footer>
-      <va-button :disabled="!isValidForm"
+      <va-button v-if="enabledEnrolBtn"
+                 :disabled="!isValidForm"
                  type="button"
-                 @click="onEnrol(), $vaToast.init({
-          message: `Вы записались на ${selectedDate.getDate()} число на ${selectedTime}`,
-          position: 'bottom-right',
-          color: 'success',
-        });">
-        <!-- defect in the ui, the only solution is above -->
+                 @click="onEnrol()">
         Записаться
       </va-button>
     </template>
@@ -65,7 +65,10 @@ import { timesToPick } from '../../constants/';
 import { DatePickerType } from '../../types';
 import { ClientData } from '../../types/clients';
 import { maxDate, minDate, getOccupiedTimes, enrolAClient } from './Home';
+import { send } from '@emailjs/browser';
 import { mapActions } from 'vuex';
+import { monthsOfTheYear } from '../../constants';
+import { formatDate } from '@/functions';
 
 export default defineComponent({
   name: 'Home',
@@ -74,6 +77,7 @@ export default defineComponent({
   },
   data() {
     return {
+      $vaToast: {} as any,
       selectedDate: null as null | Date,
       selectedTime: null as null | string,
       showModal: false as boolean,
@@ -90,6 +94,8 @@ export default defineComponent({
         (v: string) => !!v || 'Нужно ввести телефон',
         (v: string) => /^((8|\+7)[- ]?)?(\(?\d{3}\)?[- ]?)?[\d\- ]{7,10}$/.test(v) || 'Телефон должен быть валидным',
       ],
+      loading: false as boolean,
+      enabledEnrolBtn: true as boolean,
     };
   },
   computed: {
@@ -144,6 +150,8 @@ export default defineComponent({
     },
 
     async onEnrol(): Promise<void> {
+      this.loading = true;
+      this.enabledEnrolBtn = false;
       const name = this.name;
       const phone = this.phone;
       if (this.selectedDate && this.selectedTime && name && phone) {
@@ -152,11 +160,32 @@ export default defineComponent({
         const day = this.selectedDate.getDate();
         const time = this.selectedTime;
         const enrolDate = new Date();
+
         const clientData = { name, phone, enrolDate } as ClientData;
         await enrolAClient(year, month, day, time, clientData);
+
+        const monthName = monthsOfTheYear[month];
+        const fomrattedStringDate = formatDate(enrolDate);
+        const emailSendData = {
+          clientName: name,
+          time: time,
+          day: day,
+          month: monthName,
+          enrolDate: fomrattedStringDate,
+        };
+        await send('default_service', 'template_gsi1g25', emailSendData);
+
+        this.$vaToast.init({
+          message: `Вы записались на ${this.selectedDate!.getDate()} число на ${this.selectedTime}`,
+          position: 'bottom-right',
+          color: 'success',
+        });
+
         this.selectedDate = this.selectedTime = null;
         this.name = this.phone = '';
         this.showModal = false;
+        this.loading = false;
+        this.enabledEnrolBtn = true;
       } else {
         this.setError('Введите все данные для записи');
       }
