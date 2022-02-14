@@ -173,7 +173,7 @@ export default defineComponent({
           month: monthName,
           enrolDate: fomrattedStringDate,
         };
-        await send('default_service', 'template_gsi1g25', emailSendData);
+        await send('default_service', 'template_gsi1g25', emailSendData).catch((e) => console.log(e));
 
         this.$vaToast.init({
           message: `Вы записались на ${this.selectedDate!.getDate()} число на ${this.selectedTime}`,
