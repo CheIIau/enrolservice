@@ -1,6 +1,6 @@
 {
-    "name": "RonikManik",
-    "short_name": "RonikManik",
+    "name": "",
+    "short_name": "",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",
@@ -13,7 +13,7 @@
             "type": "image/png"
         }
     ],
-    "theme_color": "#0061b5",
-    "background_color": "#0061b5",
+    "theme_color": "#ff9eef",
+    "background_color": "#ff9eef",
     "display": "standalone"
 }

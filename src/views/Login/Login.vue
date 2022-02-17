@@ -2,7 +2,8 @@
   <div class="login">
     <va-form ref="form"
              class="formLogin"
-             tag="form">
+             tag="form"
+             @submit="login">
       <va-input v-model="email"
                 autosize
                 class="mt-3 mb-4"
@@ -15,7 +16,7 @@
                 label="Пароль"
                 :rules="passwordRules">
       </va-input>
-      <va-button type="button"
+      <va-button type="submit"
                  class="mt-2"
                  :disabled="!isValid"
                  @click="login"> Авторизация </va-button>
