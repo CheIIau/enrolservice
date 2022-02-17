@@ -46,7 +46,7 @@
                  @click="openModalToEditItemById(rowIndex)" />
       <va-button flat
                  icon="delete"
-                 @click="deleteItemById(rowIndex)" />
+                 @click="onDeleteItemHandler(rowIndex)" />
     </template>
   </va-data-table>
 
@@ -61,6 +61,12 @@
                 class="my-3"
                 :label="key" />
     </slot>
+  </va-modal>
+
+  <va-modal :model-value="showDeleteItemModal"
+            message="Вы действительно хотите удалить запись"
+            @ok="deleteItem"
+            @cancel="showDeleteItemModal=false">
   </va-modal>
 </template>
 
@@ -106,6 +112,8 @@ export default defineComponent({
       ],
       editedItemId: null as null | number,
       editedItem: null as ClientData | null,
+      itemToDelete: null as null | number,
+      showDeleteItemModal: false as boolean,
     };
   },
   computed: {
@@ -209,6 +217,18 @@ export default defineComponent({
         this.editedItem = null;
         this.editedItemId = null;
       }
+    },
+    onDeleteItemHandler(rowIndex: number) {
+      this.itemToDelete = rowIndex;
+      this.showDeleteItemModal = true;
+    },
+    async deleteItem() {
+      const item = this.itemToDelete;
+      if (item !== null) {
+        await this.deleteItemById(item);
+      }
+      this.itemToDelete = null;
+      this.showDeleteItemModal = false;
     },
   },
 });

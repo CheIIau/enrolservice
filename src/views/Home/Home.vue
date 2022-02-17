@@ -174,7 +174,7 @@ export default defineComponent({
           month: monthName,
           enrolDate: fomrattedStringDate,
         };
-        // await send('default_service', 'template_gsi1g25', emailSendData).catch((e) => console.log(e));
+        await send('default_service', 'template_gsi1g25', emailSendData).catch((e) => console.log(e));
 
         this.$vaToast.init({
           message: `Вы записались на ${this.selectedDate!.getDate()} число на ${this.selectedTime}`,
@@ -214,7 +214,7 @@ export default defineComponent({
 
 .datepick-message {
   font-family: 'Source Sans Pro', sans-serif;
-  color: rgb(24, 71, 121);
+  color: rgb(181, 0, 135);
 }
 </style>
 

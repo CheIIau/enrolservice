@@ -10,7 +10,7 @@
                        to="/"
                        custom>
             <span role="link"
-                  class="pointer"
+                  class="pointer navbar-title"
                   @click="navigate">RonikManik</span>
           </router-link>
         </va-navbar-item>
@@ -21,9 +21,11 @@
                        v-slot="{ navigate }"
                        to="Login"
                        custom>
-            <span role="link"
-                  class="pointer"
-                  @click="navigate">Авторизация</span>
+            <va-button role="link"
+                       class="pointer nav-button"
+                       color="#fcd4f6"
+                       type="button"
+                       @click="navigate">Авторизация</va-button>
           </router-link>
           <div v-else>
             <router-link v-slot="{ navigate }"
@@ -79,6 +81,14 @@ export default defineComponent({
 }
 .nav-button {
   color: #f464de !important;
+}
+.navbar-title {
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+}
+.navbar-auth-btn {
+  color: white;
 }
 </style>
 
