@@ -3,6 +3,7 @@
     <date-picker v-model="selectedDate"
                  :min-date='minDate'
                  :max-date='maxDate'
+                 highlight-weekend
                  @dayclick="onDateClick($event)" />
   </div>
   <div v-if="!selectedDate"
@@ -173,7 +174,7 @@ export default defineComponent({
           month: monthName,
           enrolDate: fomrattedStringDate,
         };
-        await send('default_service', 'template_gsi1g25', emailSendData).catch((e) => console.log(e));
+        // await send('default_service', 'template_gsi1g25', emailSendData).catch((e) => console.log(e));
 
         this.$vaToast.init({
           message: `Вы записались на ${this.selectedDate!.getDate()} число на ${this.selectedTime}`,
@@ -217,3 +218,8 @@ export default defineComponent({
 }
 </style>
 
+<style>
+.vc-highlight {
+  background-color: #f464de !important;
+}
+</style>

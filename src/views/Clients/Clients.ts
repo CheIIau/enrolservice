@@ -1,4 +1,4 @@
-import { getDatabase, ref, child, onValue, set, update } from 'firebase/database';
+import { getDatabase, ref, child, onValue, set, update, get } from 'firebase/database';
 import { daysInMonth } from '../../functions';
 import { monthsOfTheYear } from '../../constants';
 import { ClientsAtTimeType, ClientData, UpdateClientData } from '../../types/clients';
@@ -11,7 +11,7 @@ export async function getYearsFromDB(): Promise<Array<string>> {
     const years = [] as Array<string>;
     const clientsRefChildren = child(clientsRef, 'clients');
     await new Promise<void>((resolve) => {
-      onValue(clientsRefChildren, (snapshot) => {
+      get(clientsRefChildren).then((snapshot) => {
         snapshot.forEach((child) => {
           const enrolYears = child.key as string;
           years.push(enrolYears);

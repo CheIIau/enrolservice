@@ -1,10 +1,11 @@
 <template>
   <div>
-    <va-navbar color="primary"
+    <va-navbar color="#ff9eef"
                :shape="true">
       <template #left>
         <va-navbar-item>
-          <va-avatar src="android-chrome-192x192.png" />
+          <va-avatar class="avatar"
+                     src="android-chrome-192x192.png" />
           <router-link v-slot="{ navigate }"
                        to="/"
                        custom>
@@ -28,11 +29,15 @@
             <router-link v-slot="{ navigate }"
                          to="Clients"
                          custom>
-              <span role="link"
-                    class="pointer  navbar-item"
-                    @click="navigate">Клиенты</span>
+              <va-button role="link"
+                         color="#fcd4f6"
+                         class='nav-button'
+                         type="button"
+                         @click="navigate">Клиенты</va-button>
             </router-link>
             <va-button type="button"
+                       color="#fcd4f6"
+                       class='nav-button'
                        @click="onLogout"> Выйти </va-button>
           </div>
 
@@ -62,15 +67,18 @@ export default defineComponent({
 
 <style scoped>
 .navbar-item {
-  border: rgb(109, 190, 255) solid 2px;
+  border: #fcd4f6 solid 2.5px;
   border-radius: 15px;
-  padding: 5px;
+  padding: 7px;
 }
 @media (max-width: 767.98px) {
   .va-navbar {
     padding: 0;
     height: 3.5rem;
   }
+}
+.nav-button {
+  color: #f464de !important;
 }
 </style>
 
@@ -84,5 +92,8 @@ export default defineComponent({
   .va-navbar__left {
     justify-content: left !important;
   }
+}
+.avatar {
+  background-color: #fcd4f6 !important;
 }
 </style>
