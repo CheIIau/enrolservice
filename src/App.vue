@@ -13,9 +13,8 @@
 </template>
 
 <script lang="ts">
-import { getMessaging, getToken } from 'firebase/messaging';
 import { defineComponent } from 'vue';
-import Navbar from './components/Navbar.vue';
+import Navbar from './components/TheNavbar.vue';
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from './configs/firebaseConfig';
 import { mapActions, mapGetters } from 'vuex';
@@ -45,25 +44,7 @@ export default defineComponent({
         this.autoLoginUser(user);
       }
     });
-    const messaging = getMessaging();
-
     init('user_HsEzFyOL27ObVuaNpwDbA');
-
-    getToken(messaging, {
-      vapidKey: 'BEzJ0Spne0WLLV-Wx5bMCr5F2-1Q2BRI2VbKep8Dmph84BQfQgr_kG_LSAnBqNc4_F4T2IUHoycS3hhFoeZtB8U',
-    })
-      .then((currentToken) => {
-        if (currentToken) {
-          // Send the token to your server and update the UI if necessary
-          // ...
-          console.log(currentToken);
-        } else {
-          console.log('No registration token available. Request permission to generate one.');
-        }
-      })
-      .catch((err) => {
-        console.log('An error occurred while retrieving token. ', err);
-      });
   },
   methods: {
     ...mapActions(['setError', 'autoLoginUser']),

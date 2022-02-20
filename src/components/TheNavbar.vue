@@ -98,9 +98,9 @@ export default defineComponent({
     flex-direction: row !important;
   }
 }
-@media (max-width: 400px) {
-  .va-navbar__left {
-    justify-content: left !important;
+@media (max-width: 406px) {
+  .va-button--normal .va-button__content {
+    padding: 12px !important;
   }
 }
 .avatar {

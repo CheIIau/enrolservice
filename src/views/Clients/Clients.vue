@@ -150,7 +150,6 @@ export default defineComponent({
   async created() {
     this.years = await getYearsFromDB();
   },
-
   methods: {
     async getClientsDays(month: string): Promise<void> {
       this.availableDays = [];

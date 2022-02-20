@@ -97,6 +97,7 @@ export default defineComponent({
       ],
       loading: false as boolean,
       enabledEnrolBtn: true as boolean,
+      token: null as null | string,
     };
   },
   computed: {
@@ -133,6 +134,24 @@ export default defineComponent({
       }
     },
   },
+  // async created() {
+  //   const messaging = getMessaging();
+
+  //   await getToken(messaging, {
+  //     vapidKey: 'BEzJ0Spne0WLLV-Wx5bMCr5F2-1Q2BRI2VbKep8Dmph84BQfQgr_kG_LSAnBqNc4_F4T2IUHoycS3hhFoeZtB8U',
+  //   })
+  //     .then((currentToken) => {
+  //       if (currentToken) {
+  //         this.token = currentToken;
+  //         console.log(currentToken);
+  //       } else {
+  //         console.log('No registration token available. Request permission to generate one.');
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.log('An error occurred while retrieving token. ', err);
+  //     });
+  // },
   methods: {
     ...mapActions(['setError']),
     async onDateClick(e: DatePickerType) {
@@ -166,15 +185,37 @@ export default defineComponent({
         await enrolAClient(year, month, day, time, clientData);
 
         const monthName = monthsOfTheYear[month];
-        const fomrattedStringDate = formatDate(enrolDate);
+        const formattedStringDate = formatDate(enrolDate);
         const emailSendData = {
           clientName: name,
           time: time,
           day: day,
           month: monthName,
-          enrolDate: fomrattedStringDate,
+          enrolDate: formattedStringDate,
         };
+        
         await send('default_service', 'template_gsi1g25', emailSendData).catch((e) => console.log(e));
+
+        // const body = {
+        //   to: this.token,
+        //   notification: {
+        //     title: 'У вас новая запись',
+        //     body: `${name} записался на ${time}, ${day} числа на ${monthName}.`,
+        //   },
+        // };
+        // const options = {
+        //   method: 'POST',
+        //   headers: new Headers({
+        //     Authorization:
+        //       'key=AAAAfDc01SU:APA91bGuunw-WX1QhLhsgU2wOOWFmW2UuBV4lOOz_t7XzPuphBS-VjdRb7a4JxiDcLtdJysJ4qyjTdb-n-_H1QOTvcuvITZbWD6X8mPG9CcsbT7Py9ZpP8t0WcUzpbUo3HrPWFHKbAeZ',
+        //     'Content-Type': 'application/json',
+        //   }),
+        //   body: JSON.stringify(body),
+        // };
+
+        // await fetch('https://fcm.googleapis.com/fcm/send', options)
+        //   .then((res) => console.log(res))
+        //   .catch((e) => console.log(e));
 
         this.$vaToast.init({
           message: `Вы записались на ${this.selectedDate!.getDate()} число на ${this.selectedTime}`,
