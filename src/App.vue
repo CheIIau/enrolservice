@@ -15,11 +15,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import Navbar from './components/TheNavbar.vue';
-import { initializeApp } from 'firebase/app';
-import { firebaseConfig } from './configs/firebaseConfig';
 import { mapActions, mapGetters } from 'vuex';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { init } from '@emailjs/browser';
+import { initializeFirebase } from './App';
 
 export default defineComponent({
   components: {
@@ -37,14 +35,8 @@ export default defineComponent({
     },
   },
   created() {
-    initializeApp(firebaseConfig);
-    const auth = getAuth();
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        this.autoLoginUser(user);
-      }
-    });
-    init('user_HsEzFyOL27ObVuaNpwDbA');
+    initializeFirebase();
+    init('user_HsEzFyOL27ObVuaNpwDbA'); //init emailJS
   },
   methods: {
     ...mapActions(['setError', 'autoLoginUser']),
@@ -62,3 +54,11 @@ export default defineComponent({
   margin-bottom: 10px;
 }
 </style>
+
+function initializeFirebase() {
+  throw new Error('Function not implemented.');
+}
+
+function initializeFirebase() {
+  throw new Error('Function not implemented.');
+}

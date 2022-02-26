@@ -21,7 +21,6 @@ const user: Module<UserState, unknown> = {
       return state.user;
     },
     localUser(): UserClass | null {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return JSON.parse(localStorage.getItem('user')!);
     },
     isUserLoggedIn(state): boolean {
