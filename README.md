@@ -1,24 +1,5 @@
-# enrolservice
+# EnrolManicureServise
 
-## Project setup
+PWA where you can make an appointment with some specialist (in this case a manicure master). A master in turn recieves an email with enrol data such as name of a client and an appointment date. Also master can view, delete and update his appointments at admin panel.
 ```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+Written on TS, firebase as DB
