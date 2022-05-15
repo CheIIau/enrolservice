@@ -4,7 +4,10 @@ PWA where you can make an appointment with some specialist (in this case a manic
 ```
 Written on TS, firebase as DB
 
+### [The link](https://enrolmanicureservice.web.app/) 
+
 The video below showing site features
 
-https://user-images.githubusercontent.com/58114735/168491068-b6548915-a846-4f6f-9eb8-1c91abbd44ba.mp4
+https://user-images.githubusercontent.com/58114735/168491143-7b705ed0-8fc5-42fe-8b17-bbf6e86c2c93.mp4
+
 
