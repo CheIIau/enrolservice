@@ -7,7 +7,10 @@ Written on TS, firebase as DB
 
 The video below showing site features
 
-https://user-images.githubusercontent.com/58114735/168491143-7b705ed0-8fc5-42fe-8b17-bbf6e86c2c93.mp4
+https://user-images.githubusercontent.com/58114735/168491228-35175323-c89c-41c2-b767-8006711c5c0f.mp4
+
+
+
 
 
 
